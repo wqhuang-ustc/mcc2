@@ -1,3 +1,5 @@
+The purpose of this group project is to realize a mobile or web application that performs local processing and also offloads computation(as well as storage) to a remote server. In particular, such an application shall extract the text contained in a source image through optical character recognition(OCR). The OCR service shall be provided by the remote server by using software containers. It is recommended to use the Tesseract Open Source OCR Engine for this project.
+
 ## Kubernetes-Mongo-Cluster Deployment.
 1. Download Dockerfile and yaml folder from backend folder
 2. Sett up Kubernetes on the running machine
