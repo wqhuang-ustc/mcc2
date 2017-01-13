@@ -1,0 +1,21 @@
+The purpose of this group project is to realize a mobile or web application that performs local processing and also offloads computation(as well as storage) to a remote server. In particular, such an application shall extract the text contained in a source image through optical character recognition(OCR). The OCR service shall be provided by the remote server by using software containers. It is recommended to use the Tesseract Open Source OCR Engine for this project.
+
+## Kubernetes-Mongo-Cluster Deployment.
+1. Download Dockerfile and yaml folder from backend folder
+2. Sett up Kubernetes on the running machine
+3. If needed,run 'chmod +x filename.sh' to make sh files excutable
+4. cd into yaml folder, and run './deploy-cluster1.sh' to create a new cluster and deploy services on the cluster. It will create a GCE cluster of 3 machines, and 3 persistent disks,(mongodb-disk7, mongodb-disk8,mongodb-disk9),to change the create disk name, open deploy.sh and modify it. The name of persistent disks will be used in kube-mongo-final.yaml.Make sure you modify both deploy.sh and kube-mongo-final.yaml.
+5. Run 'sudo kubectl get svc' to get the IP address of mongo-svc-a,mongo-svc-b,mongo-svc-c and ocr-svc-a. Three ips of mongo-svc will be used in configure.py and server.py.
+6. cd into Dockerfile folder, in both configure.py and server.py,replace the ips in 'client = MongoClient(host="ip",port=db_port', 'config = {}' with three IPs of mongo-svc. The first ip of 'config = {}' should be the same ip you put in 'client = MongoClient(host="ip",port=db_port' which sets primary mongodb replicas.
+7. rebuild the images, the push to your docker hub. For example with the name: 'kylinhuang/mcc1:latest'.
+8. cd into yaml folder, modify the name of docker image you used in step7 in ocr-rc1.yaml file.
+9. run 'sudo kubectl delete -f ocr-rc1.yaml' and 'sudo kubectl create -f ocr-rc1.yaml' to restart this pod, it will use the docker images you created in step 7.
+10. Enjoy the mobile cloud computing course.
+
+
+
+
+## Android app Depolyment
+1. Connect USB with your android phone
+2. Type 'cd android/AnanasOCR/'
+3. Type './gradlew installDebug'
