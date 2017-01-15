@@ -1,21 +1,105 @@
-The purpose of this group project is to realize a mobile or web application that performs local processing and also offloads computation(as well as storage) to a remote server. In particular, such an application shall extract the text contained in a source image through optical character recognition(OCR). The OCR service shall be provided by the remote server by using software containers. It is recommended to use the Tesseract Open Source OCR Engine for this project.
+This is the follow-me file which tell you how to deploy a kubernetes cluster on aws cloud and deployment reliable and robust service upon this cluster, future this document will cover how to monitor the cluster status and testing.
 
-## Kubernetes-Mongo-Cluster Deployment.
-1. Download Dockerfile and yaml folder from backend folder
-2. Sett up Kubernetes on the running machine
-3. If needed,run 'chmod +x filename.sh' to make sh files excutable
-4. cd into yaml folder, and run './deploy-cluster1.sh' to create a new cluster and deploy services on the cluster. It will create a GCE cluster of 3 machines, and 3 persistent disks,(mongodb-disk7, mongodb-disk8,mongodb-disk9),to change the create disk name, open deploy.sh and modify it. The name of persistent disks will be used in kube-mongo-final.yaml.Make sure you modify both deploy.sh and kube-mongo-final.yaml.
-5. Run 'sudo kubectl get svc' to get the IP address of mongo-svc-a,mongo-svc-b,mongo-svc-c and ocr-svc-a. Three ips of mongo-svc will be used in configure.py and server.py.
-6. cd into Dockerfile folder, in both configure.py and server.py,replace the ips in 'client = MongoClient(host="ip",port=db_port', 'config = {}' with three IPs of mongo-svc. The first ip of 'config = {}' should be the same ip you put in 'client = MongoClient(host="ip",port=db_port' which sets primary mongodb replicas.
-7. rebuild the images, the push to your docker hub. For example with the name: 'kylinhuang/mcc1:latest'.
-8. cd into yaml folder, modify the name of docker image you used in step7 in ocr-rc1.yaml file.
-9. run 'sudo kubectl delete -f ocr-rc1.yaml' and 'sudo kubectl create -f ocr-rc1.yaml' to restart this pod, it will use the docker images you created in step 7.
-10. Enjoy the mobile cloud computing course.
+All below operations are in a ubuntu system.
+
+Part 1: Prerequisites
+1. A AWS account.
+  1.1 Get your access key ID and secret access key, which are used to sign programatic requests that you make to AWS. Steps to get your access key ID and secret access key is list below:
+	1. Open the IAM console.
+
+	2. In the navigation pane, choose Users.
+
+	3. Choose your IAM user name (not the check box).
+
+	4. Choose the Security Credentials tab and then choose Create Access Key.
+
+	5. To see your access key, choose Show User Security Credentials. Your credentials will look something like this:
+	  Access Key ID: AKIAIOSFODNN7EXAMPLE
+	  Secret Access Key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+	  Choose Download Credentials, and store the keys in a secure location.
+  notes: Your secret key will no longer be available through the AWS Management Console; you will have the only copy. Keep it confidential in order to protect your account, and never email it. Do not share it outside your organization, even if an inquiry appears to come from AWS or Amazon.com. No one who legitimately represents Amazon will ever ask you for your secret key.
+  
+2. install and configure the AWS Command Line Interface.
+  2.1 On Linux(ubuntu) use pip to install AWS CLI. Follow below step to install python, pip and CLI.
+	sudo apt-get install python3
+	python --version [check the installation]
+	curl -O https://bootstrap.pypa.io/get-pip.py
+	sudo pip install awscli --ignore-installed six
+	sudo pip install --upgrade awscli
+	aws help [check the installation]
+  2.2 configuring the AWSCLI, you need offer AWS Access Key ID and AWS Secret Access key which you get from step 5 in prerequisites.
+	aws configure
+	AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE [you should offer yours]
+	AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY [you should offer yours]
+	Default region name [None]: us-west-1
+	Default output format [None]: json
+  your configuration and crential are store in configuration and credential files in ~/.aws/credentials and ~/.aws/config. Future we will use named profiles as default setting. you should modify ~/.aws/credentials as shown in below:
+	[default]
+	aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+	aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+	[user1]
+	aws_access_key_id=AKIAI44QH8DHBEXAMPLE
+	aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+
+And ~/.aws/config as below:
+	[default]
+	region=eu-west-1
+	output=json
+
+	[profile user1]
+	region=eu-west-1
+	output=text
+
+  notes: The AWS credentials file uses a different naming format than the CLI config file for named profiles. Do not include the 'profile ' prefix when configuring a named profile in the AWS credentials file.
+
+Notes: We will user kube-up bash script to turnup a cluster, this script use the ‘default’ AWS profile by default. You may explicitly set the AWS profile to use using the AWS_DEFAULT_PROFILE environment variable:
+	export AWS_DEFAULT_PROFILE=user1
+Part 2: Cluster turnup
+1. Cluster turnup
+  You can use wget or cURL to download and turnup the cluster.
+	#Using wget
+	export KUBERNETES_PROVIDER=aws; wget -q -O - https://get.k8s.io | bash
+	#Using cURL
+	export KUBERNETES_PROVIDER=aws; curl -sS https://get.k8s.io | bash
+  The cluster startup script will leave you with a kuberneter directory on your workstation. You can alsostartup a cluster by running the kube-up.sh file in kubernetes/cluster/kube-up.sh
+	./cluster/kube-up.sh
+
+By default, the script will provision a new VPC and a 4 node k8s cluster in us-west-2a (Oregon) with EC2 instances running on Debian. You can override the variables defined in kubernetes/cluster/aws/config-default.sh to change this behavior. Actually in this setup, we set the aws_zone to eu-west-1, thus we need to modify this config.default.sh file. Two places need to be modify as follow:
+	ZONE=${KUBE_AWS_ZONE:-eu-west-1a} [in line 17]
+	AWS_S3_REGION=${AWS_S3_REGION:-eu-west-1} [in line 58]
+
+2. Command line administration tool: kubectl
+  In kubernetes folder,you should add the appropriate binary folder to your PATH to access kubect:
+	# Linux
+	export PATH=<path/to/kubernetes-directory>/platforms/linux/amd64:$PATH
+	kubectl cluster-info [valid the kubectl tool]
+  Then you can use kubectl tool to deploy your service.
+
+3. Scaling the cluster
+  Adding and removing nodes through kubectl is not supported. You can still scale the amount of nodes manually through adjustments of the ‘Desired’ and ‘Max’ properties within the Auto Scaling Group, which was created during the installation.
+
+4. Tearing down the cluster
+	./cluster/kube-down.sh
+
+Notes: for more infomation, visit this link:https://kubernetes.io/docs/getting-started-guides/aws/
+
+Part 3: Deploying application.
+Kubernetes creates and manages sets of replicated containers (actually, replicated Pods) using Deployments.
+A Deployment simply ensures that a specified number of pod “replicas” are running at any one time. If there are too many, it will kill some. If there are too few, it will start more. It’s analogous to Google Compute Engine’s Instance Group Manager or AWS’s Auto-scaling Group (with no scaling policies).
+We use YAML file to build our application deployment.
+To deploy mongodb and our service, cd into backend/backend/yaml foler, and create the deployment from kube-mongo-final.yaml
+	kubectl create -f kube-mongo-final.yaml
+
+To view the deployment you can use the commands below:
+	kubectl get svc
+	kubectl get pods
+	kubectl describe svc service-name [for more details]
+	kubectl describe pods pod-name [for more details]
+
+To delete the whole deployment created from kube-mongo-final.yaml run the command below:
+	kubectl delete -f kube-mongo-final.yaml
+Inside yaml foler, you can find separate yaml file for each modules, for example, mongo-svc-a,mongo-svc-b.
+Notes: You can find a basic guidebook in below link: https://kubernetes.io/docs/user-guide/deploying-applications/
 
 
-
-
-## Android app Depolyment
-1. Connect USB with your android phone
-2. Type 'cd android/AnanasOCR/'
-3. Type './gradlew installDebug'
