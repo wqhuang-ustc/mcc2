@@ -1,17 +1,15 @@
-FROM ubuntu:16.04
-RUN apt-get update
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository universe
-RUN apt-get update
-RUN apt-get -y install python3-pip
-RUN apt-get -y install python-bottle
-RUN pip3 install pytesseract
-RUN pip3 install pymongo
-RUN pip3 install bottle
-RUN pip3 install pillow
-RUN apt-get -y install tesseract-ocr
+FROM centos:7
+RUN yum install -y passwd
+RUN yum install -y sudo
+RUN yum install -y vim
+RUN yum install -y curl
+RUN yum install -y initscripts && yum clean all
+RUN sudo su
+RUN adduser teamartizan
+RUN echo "artizan" |passwd --stdin teamartizan
+RUN usermod -aG wheel teamartizan
+RUN curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+RUN yum -y install nodejs
 WORKDIR /src
 COPY . /src/
-RUN python3 configure.py
-CMD ["python3", "server.py"]
-#CMD python3 configure.py && python3 server.py
+RUN yum install -y ourcareer-1.0.0-SNAPSHOT20170122153241.noarch.rpm
