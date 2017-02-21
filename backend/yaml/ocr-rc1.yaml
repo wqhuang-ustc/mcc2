@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ocr-node1
-        image: kylinhuang/mcc1:latest
+        image: kylinhuang/teamartizan:latest
         command:
 #         - python3
 #         - server.py

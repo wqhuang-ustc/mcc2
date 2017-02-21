@@ -88,6 +88,9 @@ Part 3: Deploying application.
 Kubernetes creates and manages sets of replicated containers (actually, replicated Pods) using Deployments.
 A Deployment simply ensures that a specified number of pod “replicas” are running at any one time. If there are too many, it will kill some. If there are too few, it will start more. It’s analogous to Google Compute Engine’s Instance Group Manager or AWS’s Auto-scaling Group (with no scaling policies).
 We use YAML file to build our application deployment.
+Before start to deploy the application, a new volumn for mongodb need to be claimed.
+aws ec2 create-volume --size 8 --region eu-west-1 --availability-zone eu-west-1a --volume-type gp2
+Replace volumnID in ReplicationController to mount mongodb to this new volumn.(one volumn for only one mongodb) 
 To deploy mongodb and our service, cd into backend/backend/yaml foler, and create the deployment from kube-mongo-final.yaml
 	kubectl create -f kube-mongo-final.yaml
 
