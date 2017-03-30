@@ -17,10 +17,15 @@ spec:
       containers:
       - name: ocr-node1
         image: kylinhuang/teamartizan:latest
-        command:
-#         - python3
-#         - server.py
-#         - my_replica_set
         ports:
         - containerPort: 8080
           name: ocr-server
+        volumeMounts:
+        - name: cgroup
+          mountPath: /sys/fs/cgroup
+        securityContext:
+          privileged: true
+      volumes:
+      - name: cgroup
+        emptyDir: {}
+
