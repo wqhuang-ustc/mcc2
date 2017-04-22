@@ -105,4 +105,10 @@ To delete the whole deployment created from kube-mongo-final.yaml run the comman
 Inside yaml foler, you can find separate yaml file for each modules, for example, mongo-svc-a,mongo-svc-b.
 Notes: You can find a basic guidebook in below link: https://kubernetes.io/docs/user-guide/deploying-applications/
 
-
+3.1 build docker container
+There are some critical issues related to the teamartizan containe:
+  1. The service need the support of systemd feature which is not support in native container. Thus,systemd enabled docker images.
+  2. Some modifications are needed in the yaml file to build and run the contaier.
+The steps to fix issue 1 will be demostrated below:
+  First, build systemd base image. Then build systemd enable app container. The details can be found in the links: http://jperrin.github.io/centos/2014/09/25/centos-docker-and-systemd/
+  Then CAP_SYS_ADMIN capability and volume mount. More detains can be found in the correspoding yaml file.

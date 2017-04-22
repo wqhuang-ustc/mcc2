@@ -18,13 +18,16 @@ spec:
       - name: ocr-node1
         image: kylinhuang/teamartizan:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8000
           name: ocr-server
         volumeMounts:
         - name: cgroup
           mountPath: /sys/fs/cgroup
         securityContext:
           privileged: true
+          capabilities:
+            add:
+              - CAP_SYS_ADMIN
       volumes:
       - name: cgroup
         emptyDir: {}

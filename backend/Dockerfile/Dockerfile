@@ -20,7 +20,7 @@ RUN  echo "git.coding.net,59.56.27.71 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHOW
 
 WORKDIR /src
 COPY . /src/
-RUN yum install -y ourcareer-1.0.0-SNAPSHOT20170329184009.noarch.rpm
+RUN yum install -y ourcareer-1.0.0-SNAPSHOT20170422155252.noarch.rpm
 RUN yum clean all; systemctl enable ourcareer.service
 
-CMD ["/usr/sbin/init","service start ourcareer"]
+CMD ["/usr/sbin/init"]

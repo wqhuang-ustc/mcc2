@@ -7,8 +7,8 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 8000
+      targetPort: 8000
       protocol: TCP
       name: ocr-svc-a
   selector:

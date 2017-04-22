@@ -18,9 +18,9 @@ spec:
       - name: mongo-node1
         image: mongo
         command:
-         - mongod
-         - "--replSet"
-         - my_replica_set
+#         - mongod
+#         - "--replSet"
+#         - my_replica_set
         ports:
         - containerPort: 27017
         volumeMounts:
@@ -28,6 +28,7 @@ spec:
           mountPath: /data/db
       volumes:
       - name: mongo-persistent-storage1
-        gcePersistentDisk:
-          pdName: mongodb-disk4
+        awsElasticBlockStore:
+          volumeID: vol-0449b97097722a43b
           fsType: ext4
+
